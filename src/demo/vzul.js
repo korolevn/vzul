@@ -6,10 +6,10 @@ import {Grid} from "../view-components/grid.js";
 
 const mainContainer = document.querySelector(".container");
 
-const canvas = new Canvas(700, 400);
+const canvas = new Canvas(800, 400);
 render(canvas.renderCanvas(), mainContainer);
 
-const grid = new Grid(7, 4, canvas.element);
+const grid = new Grid(5, 10, canvas.element, );
 grid.renderGrid();
 
 let x = [0, 100, 200];

@@ -11,7 +11,7 @@ const createGraphTemplate = (ctx, xarr, yarr) => {
   ctx.moveTo(0, 0);
   const intrp = interpolate(xarr, yarr);
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 389; i++) { // counter ??
     ctx.lineTo(i, intrp(i));
   }
 

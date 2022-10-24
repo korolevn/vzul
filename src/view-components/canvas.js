@@ -1,6 +1,6 @@
 import {createElement} from "../utils/render.js";
 
-const createCanvasTemplate = (width, height, padding) => {
+const createCanvasTemplate = (width, height) => {
   return (`<canvas id="canvas"
    width="${width}" height="${height}" 
   </canvas>`)

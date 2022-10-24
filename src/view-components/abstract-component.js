@@ -39,7 +39,7 @@ class AbstractComponent {
   }
 
   renderChart() {
-    return this.element;
+    return this.template;
   }
 
 }
