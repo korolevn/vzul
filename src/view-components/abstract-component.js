@@ -1,16 +1,13 @@
 class AbstractComponent {
-  constructor(x, y, canvas) {
+  constructor(x, y, canvas, color) {
     if (new.target === AbstractComponent) {
       throw new Error("can not instantiate AbstractComponent");
     }
 
-    this._ctx = canvas.getContext("2d");
+    this._canvas = canvas;
     this._element = null;
 
-    // setup Cartesian coordinate system
-
-    this._ctx.translate(0, canvas.height);
-    this._ctx.scale(1, -1);
+    this._color = color;
 
     this._coords = {
       "x" : x,
@@ -18,8 +15,8 @@ class AbstractComponent {
     }
   }
 
-  get context() {
-    return this._ctx;
+  get canvas() {
+    return this._canvas;
   }
 
   get element() {
@@ -36,6 +33,10 @@ class AbstractComponent {
 
   get coords() {
     return this._coords;
+  }
+
+  get color() {
+    return this._color;
   }
 
   renderChart() {

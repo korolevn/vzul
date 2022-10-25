@@ -14,6 +14,14 @@ class Canvas {
     this._height = height;
   }
 
+  get width () {
+    return this._width;
+  }
+
+  get height () {
+    return this._height;
+  }
+
   get template() {
     return createElement(createCanvasTemplate(this._width, this._height));
   }
