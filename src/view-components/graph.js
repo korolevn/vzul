@@ -1,9 +1,9 @@
 import { AbstractComponent } from "./abstract-component.js";
 import { interpolate } from "../utils/interpolate.js";
 
-const createGraphTemplate = (canvas, xarr, yarr, color) => {
+function createGraphTemplate (grid, context, xarr, yarr, color) {
 
-  const ctx = canvas.element.getContext("2d");
+  const ctx = context;
 
   const max = Math.max(...xarr);
   const min = Math.min(...xarr);
@@ -18,14 +18,14 @@ const createGraphTemplate = (canvas, xarr, yarr, color) => {
       let dotX = i;
       let dotY = intrp(i);
 
-      if ( dotY > canvas.height) {
-        dotY = canvas.height;
+      if ( dotY > grid.height) {
+        dotY = grid.height;
       }
       if ( dotY < 0) {
         dotY = 0;
       }
-      if ( dotX > canvas.width) {
-        dotX = canvas.width;
+      if ( dotX > grid.width) {
+        dotX = grid.width;
       }
       if ( dotX < 0) {
         dotX = 0;
@@ -40,7 +40,9 @@ const createGraphTemplate = (canvas, xarr, yarr, color) => {
 class Graph extends AbstractComponent{
 
   get template() {
-    return createGraphTemplate(this.canvas, this.coords.x, this.coords.y, this.color);
+    return createGraphTemplate(this.grid, this.context,
+                                this.coords.x, this.coords.y,
+                                this.color);
   }
 
 }

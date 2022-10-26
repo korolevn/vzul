@@ -1,10 +1,11 @@
 class AbstractComponent {
-  constructor(x, y, canvas, color) {
+  constructor(x, y, grid, color) {
     if (new.target === AbstractComponent) {
       throw new Error("can not instantiate AbstractComponent");
     }
 
-    this._canvas = canvas;
+    this._ctx = grid.context;
+    this._grid = grid;
     this._element = null;
 
     this._color = color;
@@ -15,8 +16,12 @@ class AbstractComponent {
     }
   }
 
-  get canvas() {
-    return this._canvas;
+  get context() {
+    return this._ctx;
+  }
+
+  get grid() {
+    return this._grid;
   }
 
   get element() {

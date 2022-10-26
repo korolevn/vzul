@@ -1,4 +1,4 @@
-const interpolate = (xs, ys) => {
+function interpolate (xs, ys) {
   let i, length = xs.length;
 
   // Deal with length issues
@@ -68,6 +68,6 @@ const interpolate = (xs, ys) => {
     const diff = x - xs[i], diffSq = diff*diff;
     return ys[i] + c1s[i]*diff + c2s[i]*diffSq + c3s[i]*diff*diffSq;
   };
-};
+}
 
 export { interpolate }

@@ -1,29 +1,18 @@
 import {createElement} from "../utils/render.js";
 
-const createCanvasTemplate = (width, height) => {
+function createCanvasTemplate() {
   return (`<canvas id="canvas"
-   width="${width}" height="${height}" 
+   width="400" height="400" 
   </canvas>`)
 }
 
 class Canvas {
-  constructor(width, height) {
+  constructor() {
     this._element = null;
-
-    this._width = width;
-    this._height = height;
-  }
-
-  get width () {
-    return this._width;
-  }
-
-  get height () {
-    return this._height;
   }
 
   get template() {
-    return createElement(createCanvasTemplate(this._width, this._height));
+    return createElement(createCanvasTemplate());
   }
 
   get element() {
