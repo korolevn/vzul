@@ -1,28 +1,16 @@
-function createLegendTemplate(ctx, x, y, radius, color) {
-  const legendTextSpace = 10;
-  const legendTextPadding = radius / 2 + ctx.lineWidth + legendTextSpace;
+function createLegendTemplate(ctx, color, title, grid) {
 
-  // todo: improve legend logic
+  // todo: legend template
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = color;
-  ctx.setLineDash([8, 4]);
-  ctx.textBaseline = "top";
-
-  ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillText("graph1", x, y + legendTextPadding);
-    ctx.stroke();
-  ctx.closePath();
 }
 
 class Legend {
-  constructor(context, color, x, y) {
+  constructor(context, color, title, grid) {
     this._ctx = context;
-    this._x   = x;
-    this._y   = y;
+    this._grid = grid;
     this._radius = 10;
     this._color = color;
+    this._title = title;
   }
 
   get element() {
@@ -34,7 +22,7 @@ class Legend {
   }
 
   get template() {
-    return createLegendTemplate(this._ctx, this._x, this._y, this._radius, this._color);
+    return createLegendTemplate(this._ctx, 100, 100, this._radius, this._color, this._title, this._grid);
   }
 
   set legendRadius(radius) {
@@ -45,7 +33,7 @@ class Legend {
     return this._radius;
   }
 
-  renderLegend() {
+  _render() {
     return this.element;
   }
 }

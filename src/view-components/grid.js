@@ -1,6 +1,6 @@
 import {Legend} from "./legend.js";
 
-function createGridTemplate (width, height, rows, cols, canvas, context, charts) {
+function createGridTemplate (width, height, rows, cols, canvas, context) {
   const ctx = context;
 
   const GRID_WIDTH  = width;
@@ -12,7 +12,6 @@ function createGridTemplate (width, height, rows, cols, canvas, context, charts)
   const TEXT_COLOR = "#4e4e4e";
   const fontSize = 14;
   const fontFamily = "Consolas";
-
   const TEXT_FONT = "normal " + fontSize + "px " + fontFamily;
   ctx.font = TEXT_FONT;
 
@@ -28,27 +27,18 @@ function createGridTemplate (width, height, rows, cols, canvas, context, charts)
 
   const paddingTop = TEXT_HEIGHT / 2;
   const paddingBottom = Y_AXIS_TEXT_PADDING + TEXT_HEIGHT;
+  // temporary
   const paddingRight = yLabelTextWidth / 2;
 
-  //////////////////////
-  // legend
+  width = GRID_WIDTH + xLabelTextWidth + Y_AXIS_TEXT_PADDING;
 
-  const gridAndLabelsWidth = GRID_WIDTH +
-                xLabelTextWidth +  Y_AXIS_TEXT_PADDING +
-                paddingRight;
-  const gridAndLabelsHeight = GRID_HEIGHT + paddingTop + paddingBottom;
-
-  const legendPadding = 50;
+  // temporary
   const radius = 10;
-  const legendColor = "#5893ff";
-  const legend = new Legend(ctx, legendColor,
-    gridAndLabelsWidth + legendPadding, gridAndLabelsHeight / 2 + radius / 2);
-  legend.legendRadius = radius;
+  const legendPadding = 30;
+  const legendWidth = legendPadding * 2 + radius;
 
-  ///////////////////////
-
-  canvas.width = gridAndLabelsWidth + legend.legendRadius + legendPadding * 2;
-  canvas.height = gridAndLabelsHeight;
+  canvas.width = width + paddingRight + legendWidth;
+  canvas.height = GRID_HEIGHT + paddingTop + paddingBottom;
 
   // grid and labels rendering
   ctx.beginPath();
@@ -56,18 +46,18 @@ function createGridTemplate (width, height, rows, cols, canvas, context, charts)
     ctx.fillStyle = TEXT_COLOR;
     ctx.font = TEXT_FONT;
 
-  let yRowCoord = 0.5;
-  let yLabelText = 0;
-  for(let i = 0; i < rows + 1; i++) {
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "right";
-      ctx.fillText(yLabelText.toFixed(fractPart), xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
+    let yRowCoord = 0.5;
+    let yLabelText = 0;
+    for(let i = 0; i < rows + 1; i++) {
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "right";
+        ctx.fillText(yLabelText.toFixed(fractPart), xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
 
-      ctx.moveTo(xLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
-      ctx.lineTo(GRID_WIDTH + Y_AXIS_TEXT_PADDING + xLabelTextWidth, yRowCoord + paddingTop);
+        ctx.moveTo(xLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
+        ctx.lineTo(GRID_WIDTH + Y_AXIS_TEXT_PADDING + xLabelTextWidth, yRowCoord + paddingTop);
 
-      yRowCoord +=  ROW_HEIGHT;
-      yLabelText += GRID_HEIGHT / rows;
+        yRowCoord +=  ROW_HEIGHT;
+        yLabelText += GRID_HEIGHT / rows;
     }
 
     let xColCoord = 0.5;
@@ -87,45 +77,30 @@ function createGridTemplate (width, height, rows, cols, canvas, context, charts)
 
     ctx.stroke();
   ctx.closePath();
-
-  // legend rendering
-  legend.renderLegend();
-
-  // shift coordinate system
-  ctx.translate(xLabelTextWidth + Y_AXIS_TEXT_PADDING, (paddingBottom * -1) );
-
-  // setup Cartesian coordinate system
-  ctx.translate(0, canvas.height);
-  ctx.scale(1, -1);
-
-  // charts rendering
-  charts.map((chart) => chart.renderChart());
 }
 
 class Grid {
   constructor(width, height, rows, cols, canvas) {
 
+    this._element = null;
     this._canvas = canvas;
-    this._ctx = canvas.getContext("2d");
+    this._ctx = this._canvas._ctx;
+
     this._width = width;
     this._height = height;
     this._rows = rows;
     this._cols = cols;
+
     this._charts = [];
-
-    this._element = null;
-  }
-
-  get rows() {
-    return this._rows;
-  }
-
-  get cols() {
-    return this._cols;
+    this._legends = [];
   }
 
   get width() {
     return this._width;
+  }
+
+  set width(width) {
+    this._width = width;
   }
 
   get height() {
@@ -138,9 +113,8 @@ class Grid {
 
   get template() {
     return createGridTemplate(this.width, this.height,
-                              this.rows, this.cols,
-                              this._canvas, this.context,
-                              this._charts);
+                              this._rows, this._cols,
+                              this._canvas, this.context);
   }
 
   get element() {
@@ -156,11 +130,48 @@ class Grid {
       throw new Error("graph parameter required");
     } else {
       this._charts.push(chart);
+      this._addLegend(chart);
     }
   }
 
-  renderGrid() {
+  _addLegend(chart) {
+    const legendColor = chart.color;
+    const legendTitle = chart.title;
+
+    const legend = new Legend(this.context, legendColor, legendTitle, this)
+
+    this._legends.push(legend);
+
+  }
+
+  _renderGrid() {
     return this.element;
+  }
+
+  _renderLegend(ctx, legends) {
+    // legend rendering
+    legends.map((legend) => legend._render());
+
+    // shift coordinate system
+    // ctx.translate(xLabelTextWidth + Y_AXIS_TEXT_PADDING, (paddingBottom * -1) );
+
+    // temporary
+    ctx.translate(40 + 20, (32 * -1) );
+
+    // setup Cartesian coordinate system
+    ctx.translate(0, this._canvas.height);
+    ctx.scale(1, -1);
+  }
+
+  _renderCharts(charts) {
+    // charts rendering
+    charts.map((chart) => chart.renderChart());
+  }
+
+  render() {
+    this._renderGrid();
+    this._renderLegend(this.context, this._legends);
+    this._renderCharts(this._charts);
   }
 
 }

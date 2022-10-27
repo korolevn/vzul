@@ -1,5 +1,5 @@
 class AbstractComponent {
-  constructor(x, y, grid, color) {
+  constructor(x, y, grid, title, color) {
     if (new.target === AbstractComponent) {
       throw new Error("can not instantiate AbstractComponent");
     }
@@ -9,6 +9,7 @@ class AbstractComponent {
     this._element = null;
 
     this._color = color;
+    this._title = title;
 
     this._coords = {
       "x" : x,
@@ -42,6 +43,10 @@ class AbstractComponent {
 
   get color() {
     return this._color;
+  }
+
+  get title() {
+    return this._title;
   }
 
   renderChart() {
