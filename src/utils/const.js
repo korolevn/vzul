@@ -3,4 +3,9 @@ const insertPosition = {
   end   : "end",
 }
 
-export { insertPosition }
+const axisTextPadding = {
+  y : 20,
+  x : 20,
+}
+
+export { insertPosition, axisTextPadding }

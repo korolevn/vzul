@@ -1,19 +1,23 @@
 import {Legend} from "./legend.js";
+import {axisTextPadding} from "../utils/const";
 
-function createGridTemplate (width, height, rows, cols, canvas, context) {
+function createGridTemplate (grid, canvas, context, legend) {
   const ctx = context;
 
-  const GRID_WIDTH  = width;
-  const GRID_HEIGHT = height;
-  const COL_WIDTH     = ( (GRID_WIDTH - (cols + 1)) / cols ) + 1;
-  const ROW_HEIGHT    = ( (GRID_HEIGHT - (rows + 1)) / rows ) + 1;
+  const GRID_WIDTH  = grid.width;
+  const GRID_HEIGHT = grid.height;
 
-  const STROKE_COLOR = "#eae6e6";
-  const TEXT_COLOR = "#4e4e4e";
-  const fontSize = 14;
-  const fontFamily = "Consolas";
-  const TEXT_FONT = "normal " + fontSize + "px " + fontFamily;
-  ctx.font = TEXT_FONT;
+  const rows = grid._rows;
+  const cols = grid._cols;
+  const COL_WIDTH   = ( (GRID_WIDTH - (cols + 1)) / cols ) + 1;
+  const ROW_HEIGHT  = ( (GRID_HEIGHT - (rows + 1)) / rows ) + 1;
+
+  const STROKE_COLOR  = "#eae6e6";
+  const TEXT_COLOR    = "#4e4e4e";
+  const fontSize    = 14;
+  const fontFamily  = "Consolas";
+  const TEXT_FONT   = "normal " + fontSize + "px " + fontFamily;
+  ctx.font          = TEXT_FONT;
 
   const fractPart = 1;
   const xMaxLabel = GRID_HEIGHT.toFixed(fractPart).toString();
@@ -21,25 +25,25 @@ function createGridTemplate (width, height, rows, cols, canvas, context) {
   const xLabelTextWidth = ctx.measureText(xMaxLabel).width;
   const yLabelTextWidth = ctx.measureText(yMaxLabel).width;
 
+  grid._xLabelTextWidth = xLabelTextWidth;
+
   const TEXT_HEIGHT = ctx.measureText(xLabelTextWidth).fontBoundingBoxAscent;
-  const Y_AXIS_TEXT_PADDING = 20;
-  const X_AXIS_TEXT_PADDING = 20;
+  const Y_AXIS_TEXT_PADDING = axisTextPadding.y;
+  const X_AXIS_TEXT_PADDING = axisTextPadding.x;
 
-  const paddingTop = TEXT_HEIGHT / 2;
+  const paddingTop    = TEXT_HEIGHT / 2;
   const paddingBottom = Y_AXIS_TEXT_PADDING + TEXT_HEIGHT;
-  // temporary
-  const paddingRight = yLabelTextWidth / 2;
+  const paddingRight  = yLabelTextWidth / 2;
 
-  width = GRID_WIDTH + xLabelTextWidth + Y_AXIS_TEXT_PADDING;
+  canvas.paddingTop = paddingTop;
+  canvas.paddingBottom = paddingBottom;
 
-  // temporary
-  const radius = 10;
-  const legendPadding = 30;
-  const legendWidth = legendPadding * 2 + radius;
+  const radius = legend.radius;
+  const legendPadding = legend.padding;
+  const legendWidth = legendPadding * 2 + radius * 2;
 
-  canvas.width = width + paddingRight + legendWidth;
+  canvas.width = GRID_WIDTH + xLabelTextWidth + Y_AXIS_TEXT_PADDING + paddingRight + legendWidth;
   canvas.height = GRID_HEIGHT + paddingTop + paddingBottom;
-
   // grid and labels rendering
   ctx.beginPath();
     ctx.strokeStyle = STROKE_COLOR;
@@ -49,15 +53,15 @@ function createGridTemplate (width, height, rows, cols, canvas, context) {
     let yRowCoord = 0.5;
     let yLabelText = 0;
     for(let i = 0; i < rows + 1; i++) {
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "right";
-        ctx.fillText(yLabelText.toFixed(fractPart), xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "right";
+      ctx.fillText(yLabelText.toFixed(fractPart), xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
 
-        ctx.moveTo(xLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
-        ctx.lineTo(GRID_WIDTH + Y_AXIS_TEXT_PADDING + xLabelTextWidth, yRowCoord + paddingTop);
+      ctx.moveTo(xLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
+      ctx.lineTo(GRID_WIDTH + Y_AXIS_TEXT_PADDING + xLabelTextWidth, yRowCoord + paddingTop);
 
-        yRowCoord +=  ROW_HEIGHT;
-        yLabelText += GRID_HEIGHT / rows;
+      yRowCoord +=  ROW_HEIGHT;
+      yLabelText += GRID_HEIGHT / rows;
     }
 
     let xColCoord = 0.5;
@@ -74,7 +78,6 @@ function createGridTemplate (width, height, rows, cols, canvas, context) {
       xColCoord += COL_WIDTH;
       xLabelText += GRID_WIDTH / cols;
     }
-
     ctx.stroke();
   ctx.closePath();
 }
@@ -83,6 +86,7 @@ class Grid {
   constructor(width, height, rows, cols, canvas) {
 
     this._element = null;
+    this._grid = this;
     this._canvas = canvas;
     this._ctx = this._canvas._ctx;
 
@@ -92,7 +96,36 @@ class Grid {
     this._cols = cols;
 
     this._charts = [];
+
     this._legends = [];
+    this._legendPadding = 20;
+    this._legendRadius  = 10;
+
+    this._xLabelTextWidth = null;
+  }
+
+  set legendPadding(padding) {
+    this._legendPadding = padding;
+
+    if (!(this._legends === undefined)) {
+      this._legends.map((legend) => legend.padding = padding);
+    }
+  }
+
+  get legendPadding() {
+    return this._legendPadding;
+  }
+
+  set legendRadius(radius)  {
+    this._legendRadius = radius;
+
+    if (!(this._legends === undefined)) {
+      this._legends.map((legend) => legend.radius = radius);
+    }
+  }
+
+  get legendRadius()  {
+    return this._legendRadius;
   }
 
   get width() {
@@ -112,9 +145,9 @@ class Grid {
   }
 
   get template() {
-    return createGridTemplate(this.width, this.height,
-                              this._rows, this._cols,
-                              this._canvas, this.context);
+    const legendItem = this._legends[0];
+
+    return createGridTemplate(this._grid, this._canvas, this.context, legendItem);
   }
 
   get element() {
@@ -135,10 +168,10 @@ class Grid {
   }
 
   _addLegend(chart) {
-    const legendColor = chart.color;
-    const legendTitle = chart.title;
+    const index = this._legends.length;
 
-    const legend = new Legend(this.context, legendColor, legendTitle, this)
+    const legend = new Legend(this.context, this._legendRadius, this._legendPadding,
+                              chart, this._canvas, this._legends, index);
 
     this._legends.push(legend);
 
@@ -153,10 +186,7 @@ class Grid {
     legends.map((legend) => legend._render());
 
     // shift coordinate system
-    // ctx.translate(xLabelTextWidth + Y_AXIS_TEXT_PADDING, (paddingBottom * -1) );
-
-    // temporary
-    ctx.translate(40 + 20, (32 * -1) );
+    ctx.translate(this._xLabelTextWidth + axisTextPadding.y, this._canvas.paddingBottom * -1 );
 
     // setup Cartesian coordinate system
     ctx.translate(0, this._canvas.height);

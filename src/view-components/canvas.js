@@ -9,9 +9,13 @@ function createCanvasTemplate(width, height) {
 class Canvas {
   constructor() {
     this._element = null;
+    this._ctx = this.element.getContext("2d");
+
     this._width = 400;
     this._height = 400;
-    this._ctx = this.element.getContext("2d");
+
+    this._paddingTop = 0;
+    this._paddingBottom = 0;
   }
 
   get template() {
@@ -40,6 +44,22 @@ class Canvas {
 
   set height(height) {
     this.element.height = height;
+  }
+
+  set paddingTop(padding) {
+    this._paddingTop = padding;
+  }
+
+  get paddingTop() {
+    return this._paddingTop;
+  }
+
+  set paddingBottom(padding) {
+    this._paddingBottom = padding;
+  }
+
+  get paddingBottom() {
+    return this._paddingBottom;
   }
 
   renderCanvas() {
