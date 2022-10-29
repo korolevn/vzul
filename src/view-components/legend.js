@@ -1,9 +1,8 @@
-function createLegendTemplate(ctx, radius, padding, chart, canvas, legends, index) {
-
+function createLegendTemplate (ctx, radius, padding, chart, canvas, legends, index) {
   const GRID_HEIGHT = canvas.height - canvas.paddingBottom - canvas.paddingTop;
 
   const diameter = radius * 2;
-  const space =  50;
+  const space = 50;
   const indent = space + diameter;
   const legendIndentsNumber = legends.length - 1;
   const legendIndents = (indent / 2) * legendIndentsNumber;
@@ -18,23 +17,22 @@ function createLegendTemplate(ctx, radius, padding, chart, canvas, legends, inde
 
   ctx.save();
 
-    ctx.strokeStyle = chart.color;
-    if (chart._storke === "dash") {
-      ctx.setLineDash([8, 4]);
-    }
+  ctx.strokeStyle = chart.color;
+  if (chart._storke === "dash") {
+    ctx.setLineDash([8, 4]);
+  }
 
-    ctx.beginPath();
-      ctx.arc(legendXCoord, legendYCoord, radius, 0, Math.PI * 2);
-      ctx.fillText(chart.title, legendXCoord, legendYCoord + legendTextIndent);
-      ctx.stroke();
-    ctx.closePath();
+  ctx.beginPath();
+  ctx.arc(legendXCoord, legendYCoord, radius, 0, Math.PI * 2);
+  ctx.fillText(chart.title, legendXCoord, legendYCoord + legendTextIndent);
+  ctx.stroke();
+  ctx.closePath();
 
   ctx.restore();
-
 }
 
 class Legend {
-  constructor(context, radius, padding, chart, canvas, legends, index) {
+  constructor (context, radius, padding, chart, canvas, legends, index) {
     this._ctx = context;
     this._canvas = canvas;
     this._legends = legends;
@@ -46,7 +44,7 @@ class Legend {
     this._chart = chart;
   }
 
-  get element() {
+  get element () {
     if (!this._element) {
       this._element = this.template;
     }
@@ -54,31 +52,30 @@ class Legend {
     return this._element;
   }
 
-  get template() {
-
+  get template () {
     return createLegendTemplate(this._ctx, this._radius, this._padding,
       this._chart, this._canvas, this._legends, this._index);
   }
 
-  set radius(radius) {
+  set radius (radius) {
     this._radius = radius;
   }
 
-  get radius() {
+  get radius () {
     return this._radius;
   }
 
-  set padding(padding) {
+  set padding (padding) {
     this._padding = padding;
   }
 
-  get padding() {
+  get padding () {
     return this._padding;
   }
 
-  _render() {
+  _render () {
     return this.element;
   }
 }
 
-export { Legend }
+export { Legend };

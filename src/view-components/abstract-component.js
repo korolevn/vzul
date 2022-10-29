@@ -1,5 +1,5 @@
 class AbstractComponent {
-  constructor(x, y, grid, title, color) {
+  constructor (x, y, grid, title, color) {
     if (new.target === AbstractComponent) {
       throw new Error("can not instantiate AbstractComponent");
     }
@@ -12,20 +12,20 @@ class AbstractComponent {
     this._title = title;
 
     this._coords = {
-      "x" : x,
-      "y" : y,
-    }
+      x,
+      y
+    };
   }
 
-  get context() {
+  get context () {
     return this._ctx;
   }
 
-  get grid() {
+  get grid () {
     return this._grid;
   }
 
-  get element() {
+  get element () {
     if (!this._element) {
       this._element = this.template;
     }
@@ -33,26 +33,25 @@ class AbstractComponent {
     return this._element;
   }
 
-  get template() {
+  get template () {
     throw new Error("method must be implemented");
   }
 
-  get coords() {
+  get coords () {
     return this._coords;
   }
 
-  get color() {
+  get color () {
     return this._color;
   }
 
-  get title() {
+  get title () {
     return this._title;
   }
 
-  renderChart() {
+  renderChart () {
     return this.template;
   }
-
 }
 
-export { AbstractComponent }
+export { AbstractComponent };

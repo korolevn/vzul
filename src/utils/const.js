@@ -1,11 +1,11 @@
 const insertPosition = {
-  begin : "begin",
-  end   : "end",
-}
+  begin: "begin",
+  end: "end"
+};
 
 const axisTextPadding = {
-  y : 20,
-  x : 20,
-}
+  y: 20,
+  x: 20
+};
 
-export { insertPosition, axisTextPadding }
+export { insertPosition, axisTextPadding };

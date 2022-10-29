@@ -1,13 +1,13 @@
-import {createElement} from "../utils/render.js";
+import { createElement } from "../utils/render.js";
 
-function createCanvasTemplate(width, height) {
+function createCanvasTemplate (width, height) {
   return (`<canvas id="canvas"
    width="${width}" height="${height}" 
-  </canvas>`)
+  </canvas>`);
 }
 
 class Canvas {
-  constructor() {
+  constructor () {
     this._element = null;
     this._ctx = this.element.getContext("2d");
 
@@ -18,11 +18,11 @@ class Canvas {
     this._paddingBottom = 0;
   }
 
-  get template() {
+  get template () {
     return createElement(createCanvasTemplate(this._width, this._height));
   }
 
-  get element() {
+  get element () {
     if (!this._element) {
       this._element = this.template;
     }
@@ -30,42 +30,41 @@ class Canvas {
     return this._element;
   }
 
-  get width() {
+  get width () {
     return this.element.width;
   }
 
-  set width(width) {
+  set width (width) {
     this.element.width = width;
   }
 
-  get height() {
+  get height () {
     return this.element.height;
   }
 
-  set height(height) {
+  set height (height) {
     this.element.height = height;
   }
 
-  set paddingTop(padding) {
+  set paddingTop (padding) {
     this._paddingTop = padding;
   }
 
-  get paddingTop() {
+  get paddingTop () {
     return this._paddingTop;
   }
 
-  set paddingBottom(padding) {
+  set paddingBottom (padding) {
     this._paddingBottom = padding;
   }
 
-  get paddingBottom() {
+  get paddingBottom () {
     return this._paddingBottom;
   }
 
-  renderCanvas() {
+  renderCanvas () {
     return this.element;
   }
-
 }
 
-export { Canvas }
+export { Canvas };
