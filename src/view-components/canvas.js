@@ -1,9 +1,8 @@
 import { createElement } from "../utils/render.js";
 
 function createCanvasTemplate (width, height) {
-  return (`<canvas id="canvas"
-   width="${width}" height="${height}" 
-  </canvas>`);
+  const canvas = (`<canvas id="canvas" width="${width}" height="${height}"</canvas>`);
+  return canvas;
 }
 
 class Canvas {
@@ -14,8 +13,12 @@ class Canvas {
     this._width = 400;
     this._height = 400;
 
-    this._paddingTop = 0;
-    this._paddingBottom = 0;
+    this._paddings = {
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      paddingRight: 10
+    };
   }
 
   get template () {
@@ -44,22 +47,6 @@ class Canvas {
 
   set height (height) {
     this.element.height = height;
-  }
-
-  set paddingTop (padding) {
-    this._paddingTop = padding;
-  }
-
-  get paddingTop () {
-    return this._paddingTop;
-  }
-
-  set paddingBottom (padding) {
-    this._paddingBottom = padding;
-  }
-
-  get paddingBottom () {
-    return this._paddingBottom;
   }
 
   renderCanvas () {

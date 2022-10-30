@@ -19,21 +19,34 @@ function createGridTemplate (grid, canvas, context, legend) {
   const TEXT_FONT = "normal " + fontSize + "px " + fontFamily;
   ctx.font = TEXT_FONT;
 
+  const maximums = {
+    x: [],
+    y: []
+  };
+  grid._charts.forEach((chart) => { maximums.x.push(Math.max(...chart.coords.x)); });
+  grid._charts.forEach((chart) => { maximums.y.push(Math.max(...chart.coords.y)); });
+  grid._graphsMaxX = Math.max(...maximums.x);
+  grid._graphsMaxY = Math.max(...maximums.y);
+
+  if (grid._graphsMaxY % grid._step !== 0) {
+    grid._graphsMaxY = (grid._graphsMaxY - grid._graphsMaxY % grid._step) + grid._step;
+  }
+
   const fractPart = 1;
-  const xMaxLabel = GRID_HEIGHT.toFixed(fractPart).toString();
-  const yMaxLabel = GRID_WIDTH.toFixed(fractPart).toString();
+  const xMaxLabel = grid._graphsMaxX.toFixed(fractPart).toString();
+  const yMaxLabel = grid._graphsMaxY.toFixed(fractPart).toString();
   const xLabelTextWidth = ctx.measureText(xMaxLabel).width;
   const yLabelTextWidth = ctx.measureText(yMaxLabel).width;
 
-  grid._xLabelTextWidth = xLabelTextWidth;
+  grid._yLabelTextWidth = yLabelTextWidth;
 
   const TEXT_HEIGHT = ctx.measureText(xLabelTextWidth).fontBoundingBoxAscent;
-  const Y_AXIS_TEXT_PADDING = axisTextPadding.y;
   const X_AXIS_TEXT_PADDING = axisTextPadding.x;
+  const Y_AXIS_TEXT_PADDING = axisTextPadding.y;
 
   const paddingTop = TEXT_HEIGHT / 2;
-  const paddingBottom = Y_AXIS_TEXT_PADDING + TEXT_HEIGHT;
-  const paddingRight = yLabelTextWidth / 2;
+  const paddingBottom = X_AXIS_TEXT_PADDING + TEXT_HEIGHT;
+  const paddingRight = xLabelTextWidth / 2;
 
   canvas.paddingTop = paddingTop;
   canvas.paddingBottom = paddingBottom;
@@ -42,7 +55,7 @@ function createGridTemplate (grid, canvas, context, legend) {
   const legendPadding = legend.padding;
   const legendWidth = legendPadding * 2 + radius * 2;
 
-  canvas.width = GRID_WIDTH + xLabelTextWidth + Y_AXIS_TEXT_PADDING + paddingRight + legendWidth;
+  canvas.width = GRID_WIDTH + yLabelTextWidth + Y_AXIS_TEXT_PADDING + paddingRight + legendWidth;
   canvas.height = GRID_HEIGHT + paddingTop + paddingBottom;
   // grid and labels rendering
   ctx.beginPath();
@@ -55,16 +68,13 @@ function createGridTemplate (grid, canvas, context, legend) {
   for (let i = 0; i < rows + 1; i++) {
     ctx.textBaseline = "middle";
     ctx.textAlign = "right";
-    // TODO: label text change
-    // temporary
-    // ctx.fillText(yLabelText.toFixed(fractPart), xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
-    ctx.fillText("label", xLabelTextWidth, ROW_HEIGHT * rows + paddingTop - yRowCoord);
+    ctx.fillText(yLabelText.toFixed(fractPart), yLabelTextWidth, GRID_HEIGHT + paddingTop - yRowCoord);
 
-    ctx.moveTo(xLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
-    ctx.lineTo(GRID_WIDTH + Y_AXIS_TEXT_PADDING + xLabelTextWidth, yRowCoord + paddingTop);
+    ctx.moveTo(yLabelTextWidth + Y_AXIS_TEXT_PADDING, yRowCoord + paddingTop);
+    ctx.lineTo(yLabelTextWidth + Y_AXIS_TEXT_PADDING + GRID_WIDTH, yRowCoord + paddingTop);
 
     yRowCoord += ROW_HEIGHT;
-    yLabelText += GRID_HEIGHT / rows;
+    yLabelText += grid._graphsMaxY / rows;
   }
 
   let xColCoord = 0.5;
@@ -72,27 +82,21 @@ function createGridTemplate (grid, canvas, context, legend) {
   for (let i = 0; i < cols + 1; i++) {
     ctx.textBaseline = "top";
     ctx.textAlign = "center";
-    // TODO: label text change
-    // temporary
-    // ctx.fillText(xLabelText.toFixed(fractPart), xColCoord + xLabelTextWidth + Y_AXIS_TEXT_PADDING,
-    //   ROW_HEIGHT * rows + paddingTop + X_AXIS_TEXT_PADDING);
+    ctx.fillText(xLabelText.toFixed(fractPart), xColCoord + yLabelTextWidth + Y_AXIS_TEXT_PADDING,
+      GRID_HEIGHT + paddingTop + X_AXIS_TEXT_PADDING);
 
-    ctx.fillText("label", xColCoord + xLabelTextWidth + Y_AXIS_TEXT_PADDING,
-      ROW_HEIGHT * rows + paddingTop + X_AXIS_TEXT_PADDING);
-
-
-    ctx.moveTo(xColCoord + xLabelTextWidth + Y_AXIS_TEXT_PADDING, 0.5 + paddingTop);
-    ctx.lineTo(xColCoord + xLabelTextWidth + Y_AXIS_TEXT_PADDING, ROW_HEIGHT * rows + paddingTop);
+    ctx.moveTo(xColCoord + yLabelTextWidth + Y_AXIS_TEXT_PADDING, 0.5 + paddingTop);
+    ctx.lineTo(xColCoord + yLabelTextWidth + Y_AXIS_TEXT_PADDING, GRID_HEIGHT + paddingTop);
 
     xColCoord += COL_WIDTH;
-    xLabelText += GRID_WIDTH / cols;
+    xLabelText += grid._graphsMaxX / cols;
   }
   ctx.stroke();
   ctx.closePath();
 }
 
 class Grid {
-  constructor (width, height, rows, cols, canvas) {
+  constructor (width, height, rows, cols, step, canvas) {
     this._element = null;
     this._grid = this;
     this._canvas = canvas;
@@ -109,7 +113,10 @@ class Grid {
     this._legendPadding = 20;
     this._legendRadius = 10;
 
-    this._xLabelTextWidth = null;
+    this._yLabelTextWidth = null;
+    this._graphsMaxX = this._width;
+    this._graphsMaxY = this._height;
+    this._step = step;
   }
 
   set legendPadding (padding) {
@@ -188,16 +195,15 @@ class Grid {
     return this.element;
   }
 
+  _renderLabels (x, y) {
+    this._ctx.save();
+    this._ctx.fillText(this._graphsMaxX, x, y);
+    this._ctx.restore();
+  }
+
   _renderLegend (ctx, legends) {
     // legend rendering
     legends.map((legend) => legend._render());
-
-    // shift coordinate system
-    ctx.translate(this._xLabelTextWidth + axisTextPadding.y, this._canvas.paddingBottom * -1);
-
-    // setup Cartesian coordinate system
-    ctx.translate(0, this._canvas.height);
-    ctx.scale(1, -1);
   }
 
   _renderCharts (charts) {

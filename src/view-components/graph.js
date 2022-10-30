@@ -1,5 +1,7 @@
 import { AbstractComponent } from "./abstract-component.js";
 import { interpolate } from "../utils/interpolate.js";
+import { toCartesian } from "../utils/render";
+import { axisTextPadding } from "../utils/const";
 
 function createGraphTemplate (grid, context, xarr, yarr, color, stroke) {
   const ctx = context;
@@ -11,33 +13,30 @@ function createGraphTemplate (grid, context, xarr, yarr, color, stroke) {
   ctx.lineWidth = 2;
   ctx.strokeStyle = color;
 
-  ctx.save();
+  const scale = 1;
 
   if (stroke === "dash") {
     ctx.setLineDash([10, 3]);
   }
 
-  const maximums = {
-    x : [],
-    y : [],
-  };
-
-  grid._charts.forEach((chart) => { maximums.x.push(Math.max(...chart.coords.x)); });
-  grid._charts.forEach((chart) => { maximums.y.push(Math.max(...chart.coords.y)); });
-  const graphsMaxX = Math.max(...maximums.x);
-  const graphsMaxY = Math.max(...maximums.y);
+  const graphsMaxX = grid._graphsMaxX;
+  const graphsMaxY = grid._graphsMaxY;
 
   let scaleX = 1;
   let scaleY = 1;
+
   if (graphsMaxX > grid.width) {
-    scaleX = grid.width / graphsMaxX;
+    scaleX = grid.width / graphsMaxX * scale;
   }
   if (graphsMaxY > grid.height) {
-    scaleY = grid.height / graphsMaxY;
+    scaleY = grid.height / graphsMaxY * scale;
   }
-
-
+  ctx.save();
   ctx.beginPath();
+
+  ctx.translate(grid._yLabelTextWidth + axisTextPadding.y, grid._canvas.paddingBottom * -1);
+  toCartesian(grid._canvas, grid._ctx);
+
   for (let i = min; i < max; i++) {
     let dotX = i * scaleX;
     let dotY = intrp(i) * scaleY;
@@ -60,7 +59,6 @@ function createGraphTemplate (grid, context, xarr, yarr, color, stroke) {
 
   ctx.stroke();
   ctx.closePath();
-
   ctx.restore();
 }
 
