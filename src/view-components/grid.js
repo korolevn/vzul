@@ -1,5 +1,5 @@
 import { Legend } from "./legend.js";
-import { axisTextPadding } from "../utils/const";
+import { axisTextPadding } from "../utils/const.js";
 
 function createGridTemplate (grid, canvas, context, legend) {
   const ctx = context;
@@ -19,24 +19,41 @@ function createGridTemplate (grid, canvas, context, legend) {
   const TEXT_FONT = "normal " + fontSize + "px " + fontFamily;
   ctx.font = TEXT_FONT;
 
+  // find min and max axis values of charts
   const maximums = {
     x: [],
     y: []
   };
-  grid._charts.forEach((chart) => { maximums.x.push(Math.max(...chart.coords.x)); });
-  grid._charts.forEach((chart) => { maximums.y.push(Math.max(...chart.coords.y)); });
+  const minimums = {
+    x: [],
+    y: []
+  };
+
+  grid._charts.forEach((chart) => {
+    maximums.x.push(Math.max(...chart.coords.x));
+    minimums.x.push(Math.min(...chart.coords.x));
+    maximums.y.push(Math.max(...chart.coords.y));
+    minimums.y.push(Math.min(...chart.coords.y));
+  });
+
   grid._graphsMaxX = Math.max(...maximums.x);
+  grid._graphsMinX = Math.min(...minimums.x);
   grid._graphsMaxY = Math.max(...maximums.y);
+  grid._graphsMinY = Math.min(...minimums.y);
 
   if (grid._graphsMaxY % grid._step !== 0) {
     grid._graphsMaxY = (grid._graphsMaxY - grid._graphsMaxY % grid._step) + grid._step;
   }
 
+  const maxLabelLength = (label1, label2) => {
+    return (label1.toString().length > label2.toString().length) ? label1 : label2;
+  };
+
   const fractPart = 1;
-  const xMaxLabel = grid._graphsMaxX.toFixed(fractPart).toString();
-  const yMaxLabel = grid._graphsMaxY.toFixed(fractPart).toString();
-  const xLabelTextWidth = ctx.measureText(xMaxLabel).width;
-  const yLabelTextWidth = ctx.measureText(yMaxLabel).width;
+  const xLabelLongestText = maxLabelLength(grid._graphsMaxX, grid._graphsMinX);
+  const yLabelLongestText = maxLabelLength(grid._graphsMaxY, grid._graphsMinY);
+  const xLabelTextWidth = ctx.measureText(xLabelLongestText.toFixed(fractPart)).width;
+  const yLabelTextWidth = ctx.measureText(yLabelLongestText.toFixed(fractPart)).width;
 
   grid._yLabelTextWidth = yLabelTextWidth;
 
@@ -64,7 +81,7 @@ function createGridTemplate (grid, canvas, context, legend) {
   ctx.font = TEXT_FONT;
 
   let yRowCoord = 0.5;
-  let yLabelText = 0;
+  let yLabelText = grid._graphsMinY;
   for (let i = 0; i < rows + 1; i++) {
     ctx.textBaseline = "middle";
     ctx.textAlign = "right";
@@ -74,11 +91,11 @@ function createGridTemplate (grid, canvas, context, legend) {
     ctx.lineTo(yLabelTextWidth + Y_AXIS_TEXT_PADDING + GRID_WIDTH, yRowCoord + paddingTop);
 
     yRowCoord += ROW_HEIGHT;
-    yLabelText += grid._graphsMaxY / rows;
+    yLabelText += (grid._graphsMaxY - grid._graphsMinY) / rows;
   }
 
   let xColCoord = 0.5;
-  let xLabelText = 0;
+  let xLabelText = grid._graphsMinX;
   for (let i = 0; i < cols + 1; i++) {
     ctx.textBaseline = "top";
     ctx.textAlign = "center";
@@ -89,7 +106,7 @@ function createGridTemplate (grid, canvas, context, legend) {
     ctx.lineTo(xColCoord + yLabelTextWidth + Y_AXIS_TEXT_PADDING, GRID_HEIGHT + paddingTop);
 
     xColCoord += COL_WIDTH;
-    xLabelText += grid._graphsMaxX / cols;
+    xLabelText += (grid._graphsMaxX - grid._graphsMinX) / cols;
   }
   ctx.stroke();
   ctx.closePath();
@@ -177,6 +194,7 @@ class Grid {
     if (chart === undefined) {
       throw new Error("graph parameter required");
     } else {
+      chart._grid = this;
       this._charts.push(chart);
       this._addLegend(chart);
     }
@@ -193,12 +211,6 @@ class Grid {
 
   _renderGrid () {
     return this.element;
-  }
-
-  _renderLabels (x, y) {
-    this._ctx.save();
-    this._ctx.fillText(this._graphsMaxX, x, y);
-    this._ctx.restore();
   }
 
   _renderLegend (ctx, legends) {
