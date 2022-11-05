@@ -9,19 +9,19 @@ const mainContainer = document.querySelector(".container");
 const canvas = new Canvas();
 render(canvas.renderCanvas(), mainContainer);
 
-const grid = new Grid(600, 400, 9, 10, 10, canvas);
+const grid = new Grid(600, 400, [300, 80], canvas);
 
-const x = [100, 200, 300, 400, 500];
-const y = [50, 0, 300, 100, 50];
+const x = [-400, -100, 200, 800];
+const y = [0, 80, 640, 0];
 const graph1 = new Graph(x, y, "graph1", "#5893ff");
 
-const x2 = [100, 200, 400, 500, 600];
-const y2 = [300, 150, 230, 700, 100];
-const graph2 = new Graph(x2, y2, "graph2", "#ffc99c");
+const x2 = [-300, 100, 200, 700];
+const y2 = [320, 400, 240, 320];
+const graph2 = new Graph(x2, y2, "graph2", "#ffc277");
 
-const x3 = [-400, -70, -15, 700];
-const y3 = [200, 0, -100, 800];
-const graph3 = new Graph(x3, y3, "graph3", "#41ffc6");
+const x3 = [-500, -200, 400, 800];
+const y3 = [400, 80, 240, 400];
+const graph3 = new Graph(x3, y3, "graph3", "#41ff9d");
 
 const graphs = [graph1, graph2, graph3];
 graphs.forEach((graph) => {
@@ -30,6 +30,7 @@ graphs.forEach((graph) => {
 });
 
 graph1.line();
+graph2.line();
 
 grid.legendRadius = 8;
 grid.legendPadding = 50;

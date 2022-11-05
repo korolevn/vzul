@@ -17,52 +17,21 @@ function createGraphTemplate (grid, context, xarr, yarr, color, stroke) {
     ctx.setLineDash([10, 3]);
   }
 
-  const graphsMaxX = grid._graphsMaxX;
-  const graphsMaxY = grid._graphsMaxY;
-  const graphsMinX = grid._graphsMinX;
-  const graphsMinY = grid._graphsMinY;
-
-  let scaleX = 1;
-  let scaleY = 1;
-  let shiftX = 0;
-  let shiftY = 0;
-
-  if (graphsMinX < 0 || graphsMaxX > grid.width) {
-    scaleX = grid.width / (graphsMaxX - graphsMinX);
-    shiftX = graphsMinX * -1;
-  }
-  if (graphsMinY < 0 || graphsMaxY > grid.height) {
-    scaleY = grid.height / (graphsMaxY - graphsMinY);
-    shiftY = graphsMinY * -1;
-  }
+  const shiftX = grid._graphsMinX * grid.widthCoeff;
+  const shiftY = grid._graphsMinY * grid.heightCoeff;
 
   ctx.save();
   ctx.beginPath();
+    ctx.translate(grid._yLabelTextWidth + axisTextPadding.y, grid._canvas.paddingBottom * -1);
+    toCartesian(grid._canvas, grid._ctx);
 
-  ctx.translate(grid._yLabelTextWidth + axisTextPadding.y, grid._canvas.paddingBottom * -1);
-  toCartesian(grid._canvas, grid._ctx);
-
-  for (let i = min; i < max; i++) {
-    let dotX = (i + shiftX) * scaleX;
-    let dotY = (intrp(i) + shiftY) * scaleY;
-
-    if (dotY > grid.height) {
-      dotY = grid.height;
-    }
-    if (dotY < 0) {
-      dotY = 0;
-    }
-    if (dotX > grid.width) {
-      dotX = grid.width;
-    }
-    if (dotX < 0) {
-      dotX = 0;
+    for (let i = min; i < max; i++) {
+      let dotX = i * grid.widthCoeff - shiftX;
+      let dotY = intrp(i) * grid.heightCoeff - shiftY;
+      ctx.lineTo(dotX, dotY);
     }
 
-    ctx.lineTo(dotX, dotY);
-  }
-
-  ctx.stroke();
+    ctx.stroke();
   ctx.closePath();
   ctx.restore();
 }
