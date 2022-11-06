@@ -26,11 +26,11 @@ const graph3 = new Graph(x3, y3, "graph3", "#41ff9d");
 const graphs = [graph1, graph2, graph3];
 graphs.forEach((graph) => {
   grid.addChart(graph);
-  graph.dash();
+  graph.straight();
 });
 
-graph1.line();
-graph2.line();
+graph1.dash();
+graph1.spline();
 
 grid.legendRadius = 8;
 grid.legendPadding = 50;

@@ -3,36 +3,45 @@ import { interpolate } from "../utils/interpolate.js";
 import { toCartesian } from "../utils/render.js";
 import { axisTextPadding } from "../utils/const.js";
 
-function createGraphTemplate (grid, context, xarr, yarr, color, stroke) {
+function createGraphTemplate (grid, context, xarr, yarr, color, stroke, smooth) {
   const ctx = context;
 
   const max = Math.max(...xarr);
   const min = Math.min(...xarr);
   const intrp = interpolate(xarr, yarr);
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = color;
-
-  if (stroke === "dash") {
-    ctx.setLineDash([10, 3]);
-  }
-
   const shiftX = grid._graphsMinX * grid.widthCoeff;
   const shiftY = grid._graphsMinY * grid.heightCoeff;
 
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = color;
+
   ctx.save();
-  ctx.beginPath();
-    ctx.translate(grid._yLabelTextWidth + axisTextPadding.y, grid._canvas.paddingBottom * -1);
-    toCartesian(grid._canvas, grid._ctx);
+  if (stroke === "dash") {
+    ctx.setLineDash([10, 3]);
+  }
+    ctx.beginPath();
 
-    for (let i = min; i < max; i++) {
-      let dotX = i * grid.widthCoeff - shiftX;
-      let dotY = intrp(i) * grid.heightCoeff - shiftY;
-      ctx.lineTo(dotX, dotY);
-    }
+      ctx.translate(grid._yLabelTextWidth + axisTextPadding.y, grid._canvas.paddingBottom * -1);
+      toCartesian(grid._canvas, grid._ctx);
 
-    ctx.stroke();
-  ctx.closePath();
+      if (smooth) {
+        for (let i = min; i < max; i++) {
+          const x = i * grid.widthCoeff - shiftX;
+          const y = intrp(i) * grid.heightCoeff - shiftY;
+
+          ctx.lineTo(x, y);
+        }
+      } else {
+        for (let dot in xarr) {
+          const x = xarr[dot] * grid.widthCoeff - shiftX;
+          const y = yarr[dot] * grid.heightCoeff - shiftY;
+
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    ctx.closePath();
   ctx.restore();
 }
 
@@ -42,12 +51,13 @@ class Graph extends AbstractComponent {
 
     this._grid = null;
     this._storke = "line";
+    this._smooth = true;
   }
 
   get template () {
     return createGraphTemplate(this._grid, this.context,
       this.coords.x, this.coords.y,
-      this.color, this._storke);
+      this.color, this._storke, this._smooth);
   }
 
   get context () {
@@ -60,6 +70,14 @@ class Graph extends AbstractComponent {
 
   line () {
     this._storke = "line";
+  }
+
+  straight() {
+    this._smooth = false;
+  }
+
+  spline() {
+    this._smooth = true;
   }
 }
 

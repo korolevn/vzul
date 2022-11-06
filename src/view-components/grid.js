@@ -61,8 +61,8 @@ function createGridTemplate (grid, canvas, context, legend) {
     xWidth = xWidth - (xWidth % xStep) + xStep;
   }
 
-  yLabelMax = xWidth - Math.abs(grid._graphsMinY);
-  xLabelMax = yHeight - Math.abs(grid._graphsMinX);
+  yLabelMax = yHeight - Math.abs(grid._graphsMinY);
+  xLabelMax = xWidth - Math.abs(grid._graphsMinX);
 
   const heightCoeff = grid.height / yHeight;
   const widthCoeff = grid.width / xWidth;
