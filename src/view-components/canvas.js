@@ -1,28 +1,15 @@
 import { createElement } from "../utils/render.js";
 
-function createCanvasTemplate (width, height) {
-  const canvas = (`<canvas id="canvas" width="${width}" height="${height}"</canvas>`);
-  return canvas;
-}
+class CanvasView {
 
-class Canvas {
-  constructor () {
+  constructor (canvas) {
     this._element = null;
-    this._ctx = this.element.getContext("2d");
-
-    this._width = 400;
-    this._height = 400;
-
-    this._paddings = {
-      paddingTop: 10,
-      paddingBottom: 10,
-      paddingLeft: 10,
-      paddingRight: 10
-    };
+    this._context = null;
+    this._canvas = canvas;
   }
 
   get template () {
-    return createElement(createCanvasTemplate(this._width, this._height));
+    return createElement(createCanvasTemplate(this._canvas));
   }
 
   get element () {
@@ -33,25 +20,32 @@ class Canvas {
     return this._element;
   }
 
-  get width () {
-    return this.element.width;
+  get context () {
+    if (!this._context) {
+      this._context = this.element.getContext("2d");
+    }
+
+    return this._context;
   }
 
-  set width (width) {
-    this.element.width = width;
+  rerender() {
+    this._element = this.template;
+    this._context = this.element.getContext("2d");
   }
 
-  get height () {
-    return this.element.height;
-  }
-
-  set height (height) {
-    this.element.height = height;
-  }
-
-  renderCanvas () {
-    return this.element;
-  }
 }
 
-export { Canvas };
+function createCanvasTemplate (canvas) {
+  const padding = canvas.padding;
+  const canvasMarkup = (`<canvas id="${canvas.id}" width="${canvas.width}" height="${canvas.height}" 
+  style="background-color: ${canvas.color}; 
+  padding-top: ${padding.top}px;
+  padding-bottom: ${padding.bottom}px;
+  padding-right: ${padding.right}px;
+  padding-left: ${padding.left}px;
+  "</canvas>`);
+
+  return canvasMarkup;
+}
+
+export { CanvasView };

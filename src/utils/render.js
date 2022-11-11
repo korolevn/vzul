@@ -12,9 +12,4 @@ const render = (component, container, position = insertPosition.end) => {
   if (position === insertPosition.end) container.append(component);
 };
 
-function toCartesian (canvas, context) {
-  context.translate(0, canvas.height);
-  context.scale(1, -1);
-}
-
-export { createElement, render, toCartesian };
+export { createElement, render };
