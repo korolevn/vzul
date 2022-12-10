@@ -28,11 +28,6 @@ class CanvasView {
     return this._context;
   }
 
-  rerender() {
-    this._element = this.template;
-    this._context = this.element.getContext("2d");
-  }
-
 }
 
 function createCanvasTemplate (canvas) {

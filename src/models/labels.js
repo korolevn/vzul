@@ -1,31 +1,59 @@
 class LabelsModel {
-  constructor(context) {
-    this.context = context;
+  constructor() {
 
-    this.textColor = "#6f6f6f";
-    this.fontSize = 18;
-    this.fontFamily = "Consolas";
-    this.textFont = "normal " + this.fontSize + "px " + this.fontFamily;
-    this.fractPart = 1;
+    this._grid = null;
+    this._graphs = null;
 
-    this.yLabelMax = 50;
-    this.xLabelMax = 50;
-    this.xLabelMin = 0;
-    this.yLabelMin = 0;
+  }
 
-    const ctx = this.context;
+  get text () {
+    return new Text(this);
+  }
 
-    ctx.font = this.textFont;
-    const xLabelLongestText = this.maxLabelLength(this.xLabelMax, this.xLabelMin);
-    const yLabelLongestText = this.maxLabelLength(this.yLabelMax, this.yLabelMin);
+  get graphs() {
+    return this._graphs;
+  }
 
-    this.xLabelTextWidth = ctx.measureText(xLabelLongestText.toFixed(this.fractPart)).width;
-    this.yLabelTextWidth = ctx.measureText(yLabelLongestText.toFixed(this.fractPart)).width;
-    this.labelTextHeight = ctx.measureText(this.xLabelMax).fontBoundingBoxAscent;
+  set graphs (graphs) {
+    this._graphs = graphs;
+  }
+
+  get grid() {
+    return this._grid;
+  }
+
+  set grid(grid) {
+    this._grid = grid;
   }
 
   maxLabelLength (label1, label2) {
     return (label1.toString().length > label2.toString().length) ? label1 : label2;
+  }
+}
+
+class Text {
+  constructor(labels) {
+
+    const ctx = labels.grid.context;
+    const ex = labels.graphs.extremum;
+    const xMax = ex.max.x;
+    const yMax = ex.max.y;
+    const xMin = ex.min.x;
+    const yMin = ex.min.y;
+    const xLabelLongestText = labels.maxLabelLength(xMax, xMin);
+    const yLabelLongestText = labels.maxLabelLength(yMax, yMin);
+    const fontSize = 18;
+    const fontFamily = "Consolas";
+
+    this.fractPart = 1;
+    this.textColor = "#a1a1a1";
+    this.textFont = "normal " + fontSize + "px " + fontFamily;
+
+    ctx.font = this.textFont;
+    this.xLabelTextWidth = ctx.measureText(xLabelLongestText.toFixed(this.fractPart)).width;
+    this.yLabelTextWidth = ctx.measureText(yLabelLongestText.toFixed(this.fractPart)).width;
+    this.labelTextHeight = ctx.measureText(xMax).fontBoundingBoxAscent;
+
   }
 }
 

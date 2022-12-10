@@ -14,39 +14,59 @@ class GridView {
 function createGrid (grid) {
 
   const labels = grid.labels;
-  const yMin = grid.extremum.min.y;
-  const yMax = grid.extremum.max.y;
+  const text = labels.text;
+  const textPaddingTop = text.labelTextHeight / 2;
 
-  const rowHeight = grid.height / grid.rows;
+  const rowHeight = (grid.height - text.labelTextHeight) / grid.rows;
+  const colWidth = (grid.width)/ grid.cols;
 
   const coords = {
-    start : {
-      x: labels.yLabelTextWidth + axisTextPadding.y,
-      y: labels.labelTextHeight / 2,
+    row : {
+      start : {
+        x: 0,
+        y: textPaddingTop,
+      },
+      end : {
+        x: grid.width,
+        y: textPaddingTop,
+      }
     },
-    end : {
-      x: grid.width,
-      y: labels.labelTextHeight / 2,
+
+    col : {
+      start : {
+        x: 0,
+        y: textPaddingTop,
+      },
+      end : {
+        x: 0,
+        y: grid.height - text.labelTextHeight / 2,
+      }
     }
   }
 
   const ctx = grid.context;
   ctx.strokeStyle = grid.strokeColor;
 
-  renderLines(grid, coords, rowHeight);
+  renderLines(grid, grid.rows, coords.row, 0, rowHeight);
+  renderLines(grid, grid.cols, coords.col, colWidth, 0);
 }
 
-function renderLines(grid, coords, step) {
+function renderLines(grid, lines, coords, xSpace, ySpace) {
   const ctx = grid.context;
 
   ctx.beginPath();
-  for (let i = 0; i < grid.rows + 1; i++) {
+  for (let i = 0; i < lines + 1; i++) {
 
     ctx.moveTo(coords.start.x, coords.start.y);
     ctx.lineTo(coords.end.x, coords.end.y);
 
-    coords.start.y += step;
-    coords.end.y += step;
+    coords.start.x += xSpace;
+    coords.end.x += xSpace;
+
+    coords.start.y += ySpace;
+    coords.end.y += ySpace;
+
+    grid.canvas.padding.bottom += 100;
   }
 
   ctx.stroke();

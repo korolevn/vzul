@@ -1,8 +1,7 @@
 class CanvasModel {
 
   constructor() {
-    this.context = null;
-
+    this._context = null;
     this.id     = "canvas";
     this.color  = "#ffffff";
     this.padding = {
@@ -13,6 +12,14 @@ class CanvasModel {
     }
     this.width  = 500;
     this.height = 500;
+  }
+
+  get context () {
+    return this._context;
+  }
+
+  set context (context) {
+    this._context = context;
   }
 }
 
